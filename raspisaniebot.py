@@ -52,25 +52,29 @@ def xlsx_export(EXPORT_FORMAT, url):
         print(f"Данные успешно скачаны в {output_name}.{EXPORT_FORMAT}")
 
 def url_finder():
-    school_url = "https://sh-kompleks-pokrovskij-r04.gosweb.gosuslugi.ru/glavnoe/raspisanie/"
-    print("url ready")
+    try:
+        school_url = "https://sh-kompleks-pokrovskij-r04.gosweb.gosuslugi.ru/glavnoe/raspisanie/"
+        print("url ready")
 
-    driver = wd.Chrome(options=options)
-    print("driver setted up")
+        driver = wd.Chrome(options=options)
+        print("driver setted up")
 
-    driver.get(school_url)
-    print("window ready")
-    time.sleep(1)
+        driver.get(school_url)
+        print("window ready")
+        time.sleep(1)
 
-    schedule_link = driver.find_element(By.XPATH, '//*[@id="nc-block-df2d29ef0c9d7787f110009fa1561d60"]/div[2]/article/h3[2]/a[2]')
-    xlsx_sc = schedule_link.get_attribute('href') 
-    print(f"schedule_link contant next - {xlsx_sc}")
+        schedule_link = driver.find_element(By.XPATH, '//*[@id="nc-block-df2d29ef0c9d7787f110009fa1561d60"]/div[2]/article/h3[2]/a[2]')
+        xlsx_sc = schedule_link.get_attribute('href') 
+        print(f"schedule_link contant next - {xlsx_sc}")
 
-    xlsx_export('xlsx', xlsx_sc)
+        xlsx_export('xlsx', xlsx_sc)
 
-    driver.close()
-    driver.quit()
-    print("driver closed")
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        driver.close()
+        driver.quit()
+        print("driver closed")
 
 @bot.message_handler(commands=['r'])
 def rasp(message):
