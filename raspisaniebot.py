@@ -9,7 +9,7 @@ import time
 api_token = "7693781694:AAGMuB6q3w2FEZV90IWo5DHYz8ZhJCihBvo"
 bot = tbot.TeleBot(api_token)
 
-current_version = "Krivoy(NS)_1.0_Release" 
+current_version = "HolyMoly(NS)_1.2_Release" 
 
 options = Options()
 options.add_argument('--headless=chrome')
@@ -21,12 +21,24 @@ def xlsx_search(file, message):
     cell = 20
 
     raspisanie = f'{sheet["A1"].value} (9К класс): \n \n'
-    for i in range (6):
-        raspisanie += f'{sheet[f"B{cell}"].value} | {sheet[f'G{cell}'].value}\n'    
+    for i in range (7):
+        raspisanie += f'{cell_check(sheet, cell, "B")} | {cell_check(sheet, cell, "G")} {cell_check(sheet, cell, "H")}\n'    
         cell += 2
     bot.send_message(message.chat.id, raspisanie) 
     cell = 20
-    
+
+#holy fuck
+def cell_check(sheet, cell, letter):
+    if sheet[f'{letter}{cell}'].value == None:
+        if sheet[f'{letter}{cell + 1}'].value == None:
+            if letter == "G":
+                return "Урок отсутствует"
+            if letter == "H":
+                return ""
+        else:
+            return sheet[f'{letter}{cell + 1}'].value
+    else:
+        return sheet[f'{letter}{cell}'].value
 
 def xlsx_export(EXPORT_FORMAT, url):
     output_name = "raspisanie"
@@ -70,10 +82,15 @@ def rasp(message):
 @bot.message_handler(commands=['ver'])
 def ver(message):
     bot.send_message(message.chat.id, f'Текущая версия бота - {current_version}')
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, f"Перед использованием бота, прочитайте <a href='https://telegra.ph/Polzovatelskoe-soglashenie-dlya-ispolzovaniya-bota-raspisaniervdvtbot-03-12'>пользовательское соглашение/политику конфиденциальности!</a>", parse_mode='HTML')
 
 def main():
-    url_finder()
+    #url_finder()
+    print(f"{bot.user.username} ready")
     bot.polling()
+    
 
 if __name__ == "__main__":
     print("init")
