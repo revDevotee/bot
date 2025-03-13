@@ -10,10 +10,13 @@ import datetime
 api_token = "7693781694:AAGMuB6q3w2FEZV90IWo5DHYz8ZhJCihBvo"
 bot = tbot.TeleBot(api_token)
 
-current_version = "HolyMoly(NS)_1.4_Release" 
+current_version = "HelloWorld(S)_1.5_Release" 
 
 curr_date = datetime.datetime.today() + datetime.timedelta(days=1)
 next_day = curr_date.strftime(f'%d.%m')
+
+rasp_locate = "C:/Timesword Dev/bot/rspbot/rasp.xlsx"
+changelogs_locate = "C:/Timesword Dev/bot/rspbot/changelogs.txt"
 
 options = Options()
 options.add_argument('--headless=chrome')
@@ -93,20 +96,32 @@ def url_finder():
 
 @bot.message_handler(commands=['r'])
 def rasp(message):
-    xlsx_search("C:/Timesword Dev/bot/rspbot/rasp.xlsx", message)
-    print(f"{message.from_user.username} использовал команду '/r'!")
+    try:
+        xlsx_search("C:/Timesword Dev/bot/rspbot/rasp.xlsx", message)
+    except Exception as e:
+        print("Error while printing raspisanie " + e)
+    finally:
+        print(f"{message.from_user.username} использовал команду '/r'!")
 @bot.message_handler(commands=['ver'])
 def ver(message):
     bot.send_message(message.chat.id, f'Текущая версия бота - {current_version}')
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id, f"Перед использованием бота, прочитайте <a href='https://telegra.ph/Polzovatelskoe-soglashenie-dlya-ispolzovaniya-bota-raspisaniervdvtbot-03-12'>пользовательское соглашение/политику конфиденциальности!</a>", parse_mode='HTML')
+@bot.message_handler(commands=['changelogs'])
+def bot_updates(message):
+    msg = ""
+    with open(changelogs_locate, "r", encoding='utf-8') as file:
+        for line in file:
+            msg += f'{line}\n'
+    bot.send_message(message.chat.id, f"Список изменений: \n{msg}")
+    msg = ""
 
 
 def main():
     url_finder()
     print(f"{bot.user.username} ready")
-    bot.polling()
+    bot.infinity_polling()
     
 
 if __name__ == "__main__":
