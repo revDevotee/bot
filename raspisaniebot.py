@@ -1,3 +1,4 @@
+
 import telebot as tbot
 import openpyxl as xl
 from selenium import webdriver as wd
@@ -7,19 +8,32 @@ import requests as r
 import time
 import datetime
 
+# -*- coding: utf-8 -*-
+
 api_token = "7693781694:AAGMuB6q3w2FEZV90IWo5DHYz8ZhJCihBvo"
 bot = tbot.TeleBot(api_token)
 
-current_version = "HelloWorld(S)_1.5_Release" 
+#next ver idea - AeroDinahu
+current_version = "IUseArchBtw(NS)_1.6_Beta.Linux" 
 
 curr_date = datetime.datetime.today() + datetime.timedelta(days=1)
 next_day = curr_date.strftime(f'%d.%m')
 
+#fix site plsplspslpsl
+school_site = "https://pokrovsky.gosuslugi.ru"
+driver_locate = "/usr/bin/"
+
+#rasp_locate = "/root/rasp_bot/bot/rasp.xlsx"
+#changelogs_locate = "/root/rasp_bot/bot/changelogs.txt"
 rasp_locate = "C:/Timesword Dev/bot/rspbot/rasp.xlsx"
 changelogs_locate = "C:/Timesword Dev/bot/rspbot/changelogs.txt"
 
 options = Options()
-options.add_argument('--headless=chrome')
+#options.add_argument('--headless=chrome')
+options.add_argument('--no-sandbox')
+#options.add_argument('--disable-dev-shm-usage')
+#options.add_argument('--disable-gpu')
+#options.add_argument(f'--user-data-dir={driver_locate}')
 
 def xlsx_search(file, message):
     xlsx = xl.open(f"{file}", read_only=True)
@@ -59,29 +73,30 @@ def xlsx_export(EXPORT_FORMAT, url):
     #fix
     #kill it with fire
     #redact this path in linux!!!!
-    with open(f'C:/Timesword Dev/bot/rspbot/{output_name}.{EXPORT_FORMAT}', 'wb') as f:
+    with open(f'{rasp_locate}', 'wb') as f:
         print("Trying to write file")
         f.write(response.content)
         print(f"{output_name}.{EXPORT_FORMAT} successfully ")
 
 def url_finder():
     try:
-        school_url = "https://sh-kompleks-pokrovskij-r04.gosweb.gosuslugi.ru/glavnoe/raspisanie/"
+        #dalshe boga net!
+        #driver setup
         print("url ready")
-
         driver = wd.Chrome(options=options)
-        print("driver setted up")
-
-        driver.get(school_url)
+        print("driver ready, preparing window")       
+        driver.get(school_site)
         print("window ready")
+        #fuck that shit
+        driver.execute_script("window.scrollBy(0, 12331)")
         time.sleep(1)
+        driver.find_element(By.XPATH, '/html/body/footer/div/div[1]/div/div[3]/ul/li[1]/a').click()
+        time.sleep(1)
+
+        #getting xlsx
         schedule_link = driver.find_element(By.XPATH, '//*[@id="nc-block-df2d29ef0c9d7787f110009fa1561d60"]/div[2]/article/h3[2]/a[2]')
-        print(f"rasp date - {schedule_link.text.replace("Изменения в расписании старшей школы на ", "")}")
-        print(f"curr date - {next_day}")
         if schedule_link.text.replace("Изменения в расписании старшей школы на ", "") != next_day:
             schedule_link = driver.find_element(By.XPATH, '//*[@id="nc-block-df2d29ef0c9d7787f110009fa1561d60"]/div[2]/article/h3[2]/a[3]')
-            print(f"rasp date - {schedule_link.text.replace("Изменения в расписании старшей школы на ", "")}")
-            print(f"curr date - {next_day}")   
         xlsx_sc = schedule_link.get_attribute('href') 
         print(f"schedule_link contant next - {xlsx_sc}")
 
@@ -96,12 +111,8 @@ def url_finder():
 
 @bot.message_handler(commands=['r'])
 def rasp(message):
-    try:
-        xlsx_search("C:/Timesword Dev/bot/rspbot/rasp.xlsx", message)
-    except Exception as e:
-        print("Error while printing raspisanie " + e)
-    finally:
-        print(f"{message.from_user.username} использовал команду '/r'!")
+    xlsx_search({rasp_locate}, message)
+    print(f"{message.from_user.username} used command '/r'!")
 @bot.message_handler(commands=['ver'])
 def ver(message):
     bot.send_message(message.chat.id, f'Текущая версия бота - {current_version}')
@@ -116,7 +127,9 @@ def bot_updates(message):
             msg += f'{line}\n'
     bot.send_message(message.chat.id, f"Список изменений: \n{msg}")
     msg = ""
-
+@bot.message_handler(commands=['updatedata'])
+def data_update(message):
+    url_finder()
 
 def main():
     url_finder()
